@@ -2,3 +2,9 @@ api_platform:
     resource: .
     type: api_platform
     prefix: /api
+
+index:
+    path: /books
+    methods: ['GET']
+    defaults:
+        _controller: App\Controller\IndexController::index
