@@ -4,7 +4,7 @@ api_platform:
     prefix: /api
 
 index:
-    path: /books
+    path: /
     methods: ['GET']
     defaults:
         _controller: App\Controller\IndexController::index
