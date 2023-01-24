@@ -13,4 +13,10 @@ class IndexController extends AbstractController
         $resp = 'Hello world!';
         return $this->json($resp);
     }
+
+    public function uploadVideo()
+    {
+        $resp = 'Hello world!';
+        return $this->json($resp);
+    }
 }

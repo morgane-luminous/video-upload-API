@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\VideoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Entity;
@@ -41,9 +43,13 @@ class Video
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $createdAt;
 
+    #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'videos')]
+    private Collection $categories;
+
     public function __construct(
     ) {
         $this->createdAt = new \DateTimeImmutable();
+        $this->categories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -117,5 +123,32 @@ class Video
     public function setFileSize(?int $fileSize): void
     {
         $this->fileSize = $fileSize;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): self
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+            $category->addVideo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): self
+    {
+        if ($this->categories->removeElement($category)) {
+            $category->removeVideo($this);
+        }
+
+        return $this;
     }
 }
