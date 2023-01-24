@@ -7,14 +7,11 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20230124174551 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Create User table';
     }
 
     public function up(Schema $schema): void
