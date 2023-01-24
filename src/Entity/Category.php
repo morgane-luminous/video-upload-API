@@ -22,16 +22,12 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new Get(),
         new GetCollection(),
-        new Post(
-            denormalizationContext: "category:post",
-            security: "is_granted('ROLE_ADMIN')"
-        ),
-        new Patch(
-            denormalizationContext: "category:patch",
-            security: "is_granted('ROLE_ADMIN')"
-        ),
-        new Delete(security: "is_granted('ROLE_ADMIN')")
-    ]
+        new Post(security: "is_granted('ROLE_ADMIN')"),
+        new Patch(security: "is_granted('ROLE_ADMIN') and object.addedBy == user"),
+        new Delete(security: "is_granted('ROLE_ADMIN') and object.addedBy == user")
+    ],
+    normalizationContext: ['groups' => ["category:read"]],
+    denormalizationContext: ['groups' => ["category:write"]]
 )]
 class Category
 {
@@ -41,7 +37,7 @@ class Category
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
-    #[Groups(['category:patch', 'category:post'])]
+    #[Groups(['category:write', 'category:read'])]
     #[Assert\NotBlank]
     private string $name;
 
@@ -49,6 +45,7 @@ class Category
         targetEntity: Video::class,
         inversedBy: 'categories'
     )]
+    #[Groups(['category:read'])]
     private Collection $videos;
 
     #[ORM\ManyToOne]
