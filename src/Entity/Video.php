@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
@@ -29,7 +30,9 @@ use Symfony\Component\Validator\Constraints as Assert;
             controller: CreateVideoAction::class,
             security: "is_granted('ROLE_ADMIN')",
             deserialize: false
-        )
+        ),
+        new Delete(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user")
+
     ],
     normalizationContext: ['groups' => ['video:read']],
 )]
@@ -181,7 +184,22 @@ class Video
         return $this->categories;
     }
 
-    public function addCategory(Category $category): self
+    /**
+     * @param iterable|Category[] $categories
+     * @return $this
+     */
+    public function setCategories(iterable $categories): Video
+    {
+        $this->categories->clear();
+
+        foreach ($categories as $category) {
+            $this->addCategory($category);
+        }
+
+        return $this;
+    }
+
+    protected function addCategory(Category $category): self
     {
         if (!$this->categories->contains($category)) {
             $this->categories->add($category);

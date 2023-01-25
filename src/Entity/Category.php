@@ -23,8 +23,8 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(),
         new GetCollection(),
         new Post(security: "is_granted('ROLE_ADMIN')"),
-        new Patch(security: "is_granted('ROLE_ADMIN') and object.addedBy == user"),
-        new Delete(security: "is_granted('ROLE_ADMIN') and object.addedBy == user")
+        new Patch(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user"),
+        new Delete(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user")
     ],
     normalizationContext: ['groups' => ["category:read"]],
     denormalizationContext: ['groups' => ["category:write"]]
