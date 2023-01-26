@@ -58,6 +58,7 @@ class Video
     private string $title;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['video:read'])]
     private ?string $description = null;
 
     #[Groups(['video:read'])]
@@ -136,7 +137,7 @@ class Video
         return $this->fileName;
     }
 
-    public function setFileName(string $fileName): self
+    public function setFileName(?string $fileName): self
     {
         $this->fileName = $fileName;
 
@@ -219,7 +220,7 @@ class Video
         return $this->mimeType;
     }
 
-    public function setMimeType(string $mimeType): self
+    public function setMimeType(?string $mimeType): self
     {
         $this->mimeType = $mimeType;
 
