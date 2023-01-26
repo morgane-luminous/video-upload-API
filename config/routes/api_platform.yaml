@@ -2,9 +2,3 @@ api_platform:
     resource: .
     type: api_platform
     prefix: /
-
-index:
-    path: /
-    methods: ['GET']
-    defaults:
-        _controller: App\Controller\IndexController::index
