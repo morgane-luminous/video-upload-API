@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Controller\CreateVideoAction;
 use App\Repository\VideoRepository;
@@ -29,10 +30,11 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             controller: CreateVideoAction::class,
             security: "is_granted('ROLE_ADMIN')",
-            deserialize: false
+            validationContext: ['groups' => ['Default', 'video:create']],
+            deserialize: false,
         ),
-        new Delete(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user")
-
+        new Delete(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user"),
+        new Patch(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user")
     ],
     normalizationContext: ['groups' => ['video:read']],
 )]
@@ -52,7 +54,7 @@ class Video
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['video:create'])]
     private string $title;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -72,9 +74,10 @@ class Video
     )]
     #[Assert\File(
 //        maxSize: '150M',
-        extensions: self::AUTHORIZED_MIME_TYPES,
+        groups: ['video:create'],
+        extensions: self::AUTHORIZED_MIME_TYPES
     )]
-    #[Assert\NotNull()]
+    #[Assert\NotNull(groups: ['video:create'])]
     private ?File $file = null;
 
     #[ORM\Column(type: 'integer')]
@@ -184,22 +187,7 @@ class Video
         return $this->categories;
     }
 
-    /**
-     * @param iterable|Category[] $categories
-     * @return $this
-     */
-    public function setCategories(iterable $categories): Video
-    {
-        $this->categories->clear();
-
-        foreach ($categories as $category) {
-            $this->addCategory($category);
-        }
-
-        return $this;
-    }
-
-    protected function addCategory(Category $category): self
+    public function addCategory(Category $category): self
     {
         if (!$this->categories->contains($category)) {
             $this->categories->add($category);
