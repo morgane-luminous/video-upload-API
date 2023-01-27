@@ -58,6 +58,8 @@ For your next requests, set a Header `Authorization: Bearer *yourtoken*`
 
 ### API
 
+With this API, you will be able to upload either video file nor external URI. 
+
 You can find a complete json documentation about the API on `http://localhost:8000/docs.json` or using the command `php bin/console api:openapi:export`, but here is a quickview of availables routes.
 
 ### Videos
@@ -120,6 +122,8 @@ You have to pass through this method and endpoint to add categories to a video. 
 - DELETE `/categories/{id}`: Only category creator can delete it.
 
 ### To do now
+
+To limit file size, uncomment "maxSize" of "Assert\File" set on Video::$file
 
 Limit access to GET videos and their categories to some users (clients, admins, training program member...)
 

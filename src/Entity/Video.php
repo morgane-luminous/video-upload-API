@@ -29,12 +29,15 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(),
         new Post(
             controller: CreateVideoAction::class,
+            denormalizationContext: ['groups' => ['video:create']],
             security: "is_granted('ROLE_ADMIN')",
-            validationContext: ['groups' => ['Default', 'video:create']],
             deserialize: false,
         ),
         new Delete(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user"),
-        new Patch(security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user")
+        new Patch(
+            denormalizationContext: ['groups' => ['video:update']],
+            security: "is_granted('ROLE_ADMIN') and object.getAddedBy() == user"
+        )
     ],
     normalizationContext: ['groups' => ['video:read']],
 )]
@@ -54,17 +57,25 @@ class Video
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(groups: ['video:create'])]
+    #[Assert\NotBlank]
+    #[Groups(['video:read', 'video:create', 'video:update'])]
     private string $title;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups(['video:read', 'video:create', 'video:update'])]
     private ?string $description = null;
 
-    #[Groups(['video:read'])]
-    public ?string $uri = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Expression(
+        "null === this.getFile() or this.getUri() === null",
+        message: 'You can\'t set $uri if a file is already provided.',
+    )]
+    #[Assert\Url]
+    #[Assert\NotBlank(allowNull: true)]
+    #[Groups(['video:read', 'video:create', 'video:update'])]
+    private ?string $uri = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $fileName = null;
 
     #[UploadableField(
@@ -75,22 +86,27 @@ class Video
     )]
     #[Assert\File(
 //        maxSize: '150M',
-        groups: ['video:create'],
         extensions: self::AUTHORIZED_MIME_TYPES
     )]
-    #[Assert\NotNull(groups: ['video:create'])]
+    #[Assert\Expression(
+        "null === this.getFile() and null === this.getUri()",
+        message: 'You have to send a file or a URI.',
+        negate: false,
+    )]
+    #[Groups(['video:create'])]
     private ?File $file = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer',nullable: true)]
     private ?int $fileSize = null;
 
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $createdAt;
 
     #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'videos')]
+    #[Groups(['video:create', 'video:update'])]
     private Collection $categories;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $mimeType = null;
 
     #[ORM\ManyToOne]
@@ -235,6 +251,24 @@ class Video
     public function setAddedBy(?User $addedBy): self
     {
         $this->addedBy = $addedBy;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUri(): ?string
+    {
+        return $this->uri;
+    }
+
+    /**
+     * @param string|null $uri
+     */
+    public function setUri(?string $uri): Video
+    {
+        $this->uri = $uri;
 
         return $this;
     }

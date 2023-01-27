@@ -22,11 +22,12 @@ final class Version20230124185432 extends AbstractMigration
             id INT NOT NULL, 
             title VARCHAR(255) NOT NULL, 
             description TEXT DEFAULT NULL, 
-            file_name VARCHAR(255) NOT NULL, 
-            file_size INT NOT NULL, 
+            file_name VARCHAR(255), 
+            file_size INT, 
             created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id),
-            mime_type VARCHAR(255) NOT NULL,
-            user_id INT NOT NULL
+            mime_type VARCHAR(255),
+            user_id INT NOT NULL,
+            ADD uri VARCHAR(255),
        )');
         $this->addSql('ALTER TABLE video ADD CONSTRAINT FK_7CC7DA2CA76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('CREATE INDEX IDX_7CC7DA2CA76ED395 ON video (user_id)');
